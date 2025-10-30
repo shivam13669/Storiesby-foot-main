@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Eye, EyeOff, Mail, Lock, ArrowRight, CheckCircle } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Eye, EyeOff, Mail, Lock, ArrowRight, CheckCircle, User, Phone, Search, ChevronDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,11 +9,48 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+const COUNTRIES = [
+  { code: "IN", name: "India", dial: "+91" },
+  { code: "US", name: "United States", dial: "+1" },
+  { code: "GB", name: "United Kingdom", dial: "+44" },
+  { code: "CA", name: "Canada", dial: "+1" },
+  { code: "AU", name: "Australia", dial: "+61" },
+  { code: "DE", name: "Germany", dial: "+49" },
+  { code: "FR", name: "France", dial: "+33" },
+  { code: "IT", name: "Italy", dial: "+39" },
+  { code: "ES", name: "Spain", dial: "+34" },
+  { code: "JP", name: "Japan", dial: "+81" },
+  { code: "CN", name: "China", dial: "+86" },
+  { code: "SG", name: "Singapore", dial: "+65" },
+  { code: "MY", name: "Malaysia", dial: "+60" },
+  { code: "TH", name: "Thailand", dial: "+66" },
+  { code: "PH", name: "Philippines", dial: "+63" },
+  { code: "ID", name: "Indonesia", dial: "+62" },
+  { code: "BD", name: "Bangladesh", dial: "+880" },
+  { code: "PK", name: "Pakistan", dial: "+92" },
+  { code: "SL", name: "Sri Lanka", dial: "+94" },
+  { code: "NP", name: "Nepal", dial: "+977" },
+];
+
+const validatePassword = (password: string) => {
+  const requirements = {
+    length: password.length >= 6,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+  };
+  
+  const isValid = Object.values(requirements).every(req => req);
+  return { isValid, requirements };
+};
 
 export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -21,7 +58,26 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [password, setPassword] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]); // India as default
+  const [countrySearch, setCountrySearch] = useState("");
+  const [openCountryPopover, setOpenCountryPopover] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [signupTab, setSignupTab] = useState(null);
+
+  const filteredCountries = COUNTRIES.filter(country =>
+    country.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
+    country.dial.includes(countrySearch) ||
+    country.code.toLowerCase().includes(countrySearch.toLowerCase())
+  );
+
+  const passwordValidation = validatePassword(signupPassword);
+  const passwordsMatch = signupPassword && confirmPassword && signupPassword === confirmPassword;
+  const isPasswordValid = passwordValidation.isValid && passwordsMatch;
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +86,27 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Signup:", { signupEmail, signupPassword });
+    if (!isPasswordValid) {
+      alert("Password does not meet requirements");
+      return;
+    }
+    if (!agreeTerms) {
+      alert("Please agree to terms and conditions");
+      return;
+    }
+    console.log("Signup:", {
+      fullName,
+      signupEmail,
+      mobileNumber,
+      country: selectedCountry,
+      signupPassword,
+    });
+  };
+
+  const handleCountrySelect = (country: typeof COUNTRIES[0]) => {
+    setSelectedCountry(country);
+    setOpenCountryPopover(false);
+    setCountrySearch("");
   };
 
   return (
@@ -222,10 +298,13 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                     <p className="text-sm text-gray-700">
                       Don't have an account?{" "}
                       <button
-                        onClick={() => {
-                          const loginTab = document.querySelector('[value="login"]');
-                          const signupTab = document.querySelector('[value="signup"]');
-                          if (signupTab) signupTab.click();
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const signupElement = document.querySelector('[value="signup"]') as HTMLElement;
+                          if (signupElement) {
+                            signupElement.click();
+                          }
                         }}
                         className="text-orange-600 hover:text-orange-700 font-semibold transition-colors"
                       >
@@ -274,6 +353,24 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                   </div>
 
                   <form onSubmit={handleSignup} className="space-y-4">
+                    {/* Full Name Field */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-900">
+                        Full Name
+                      </label>
+                      <div className="relative group">
+                        <User className="absolute left-3.5 top-3.5 h-5 w-5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                        <Input
+                          type="text"
+                          placeholder="John Doe"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          className="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 bg-gray-50/50 transition-all"
+                          required
+                        />
+                      </div>
+                    </div>
+
                     {/* Email Field */}
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-gray-900">
@@ -289,6 +386,75 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                           className="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 bg-gray-50/50 transition-all"
                           required
                         />
+                      </div>
+                    </div>
+
+                    {/* Mobile Number with Country Code */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-900">
+                        Mobile Number
+                      </label>
+                      <div className="flex gap-2">
+                        {/* Country Code Selector */}
+                        <Popover open={openCountryPopover} onOpenChange={setOpenCountryPopover}>
+                          <PopoverTrigger asChild>
+                            <button
+                              type="button"
+                              className="px-3 py-2.5 border border-gray-200 rounded-lg bg-gray-50/50 hover:bg-gray-100 transition-all flex items-center gap-2 min-w-fit focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                            >
+                              <span className="text-sm font-medium">{selectedCountry.dial}</span>
+                              <ChevronDown className="h-4 w-4 text-gray-400" />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-64 p-0" align="start">
+                            <div className="p-3 border-b border-gray-200">
+                              <div className="relative">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+                                <Input
+                                  type="text"
+                                  placeholder="Search country..."
+                                  value={countrySearch}
+                                  onChange={(e) => setCountrySearch(e.target.value)}
+                                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                                />
+                              </div>
+                            </div>
+                            <div className="max-h-64 overflow-y-auto">
+                              {filteredCountries.length > 0 ? (
+                                filteredCountries.map((country) => (
+                                  <button
+                                    key={country.code}
+                                    type="button"
+                                    onClick={() => handleCountrySelect(country)}
+                                    className={`w-full text-left px-3 py-2.5 text-sm hover:bg-orange-50 transition-colors flex justify-between items-center ${
+                                      selectedCountry.code === country.code ? "bg-orange-100 font-semibold" : ""
+                                    }`}
+                                  >
+                                    <span>{country.name}</span>
+                                    <span className="text-gray-500">{country.dial}</span>
+                                  </button>
+                                ))
+                              ) : (
+                                <div className="px-3 py-4 text-sm text-gray-500 text-center">
+                                  No countries found
+                                </div>
+                              )}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+
+                        {/* Mobile Number Input */}
+                        <div className="relative group flex-1">
+                          <Phone className="absolute left-3.5 top-3.5 h-5 w-5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                          <Input
+                            type="tel"
+                            placeholder="9876543210"
+                            value={mobileNumber}
+                            onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, ''))}
+                            className="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 bg-gray-50/50 transition-all"
+                            required
+                          />
+                        </div>
                       </div>
                     </div>
 
@@ -319,12 +485,92 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                           )}
                         </button>
                       </div>
+                      
+                      {/* Password Requirements */}
+                      {signupPassword && (
+                        <div className="mt-3 p-3 bg-gray-50 rounded-lg space-y-2">
+                          <p className="text-xs font-semibold text-gray-900">Password Requirements:</p>
+                          <div className="space-y-1.5 text-xs">
+                            <div className={`flex items-center gap-2 ${passwordValidation.requirements.length ? 'text-green-600' : 'text-gray-600'}`}>
+                              <div className={`w-4 h-4 rounded-full flex items-center justify-center ${passwordValidation.requirements.length ? 'bg-green-100' : 'bg-gray-200'}`}>
+                                {passwordValidation.requirements.length && <span className="text-green-600 font-bold">✓</span>}
+                              </div>
+                              <span>At least 6 characters</span>
+                            </div>
+                            <div className={`flex items-center gap-2 ${passwordValidation.requirements.uppercase ? 'text-green-600' : 'text-gray-600'}`}>
+                              <div className={`w-4 h-4 rounded-full flex items-center justify-center ${passwordValidation.requirements.uppercase ? 'bg-green-100' : 'bg-gray-200'}`}>
+                                {passwordValidation.requirements.uppercase && <span className="text-green-600 font-bold">✓</span>}
+                              </div>
+                              <span>At least 1 uppercase letter (A-Z)</span>
+                            </div>
+                            <div className={`flex items-center gap-2 ${passwordValidation.requirements.lowercase ? 'text-green-600' : 'text-gray-600'}`}>
+                              <div className={`w-4 h-4 rounded-full flex items-center justify-center ${passwordValidation.requirements.lowercase ? 'bg-green-100' : 'bg-gray-200'}`}>
+                                {passwordValidation.requirements.lowercase && <span className="text-green-600 font-bold">✓</span>}
+                              </div>
+                              <span>At least 1 lowercase letter (a-z)</span>
+                            </div>
+                            <div className={`flex items-center gap-2 ${passwordValidation.requirements.number ? 'text-green-600' : 'text-gray-600'}`}>
+                              <div className={`w-4 h-4 rounded-full flex items-center justify-center ${passwordValidation.requirements.number ? 'bg-green-100' : 'bg-gray-200'}`}>
+                                {passwordValidation.requirements.number && <span className="text-green-600 font-bold">✓</span>}
+                              </div>
+                              <span>At least 1 number (0-9)</span>
+                            </div>
+                            <div className={`flex items-center gap-2 ${passwordValidation.requirements.special ? 'text-green-600' : 'text-gray-600'}`}>
+                              <div className={`w-4 h-4 rounded-full flex items-center justify-center ${passwordValidation.requirements.special ? 'bg-green-100' : 'bg-gray-200'}`}>
+                                {passwordValidation.requirements.special && <span className="text-green-600 font-bold">✓</span>}
+                              </div>
+                              <span>At least 1 special character (!@#$%^&*)</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Confirm Password Field */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-900">
+                        Confirm Password
+                      </label>
+                      <div className="relative group">
+                        <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                        <Input
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className={`w-full pl-11 pr-12 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 bg-gray-50/50 transition-all ${
+                            confirmPassword && !passwordsMatch ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-orange-500'
+                          }`}
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-5 w-5" />
+                          ) : (
+                            <Eye className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
+                      {confirmPassword && !passwordsMatch && (
+                        <p className="text-xs text-red-500 font-medium">Passwords do not match</p>
+                      )}
+                      {confirmPassword && passwordsMatch && (
+                        <p className="text-xs text-green-600 font-medium flex items-center gap-1">
+                          <span>✓</span> Passwords match
+                        </p>
+                      )}
                     </div>
 
                     {/* Terms Checkbox */}
-                    <label className="flex items-start gap-2 cursor-pointer group mt-1">
+                    <label className="flex items-start gap-2 cursor-pointer group mt-3">
                       <input
                         type="checkbox"
+                        checked={agreeTerms}
+                        onChange={(e) => setAgreeTerms(e.target.checked)}
                         className="w-4 h-4 rounded border-gray-300 accent-orange-500 cursor-pointer mt-0.5"
                         required
                       />
@@ -339,7 +585,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                     {/* Sign Up Button */}
                     <button
                       type="submit"
-                      className="w-full mt-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
+                      disabled={!isPasswordValid || !fullName || !signupEmail || !mobileNumber || !agreeTerms}
+                      className="w-full mt-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
                       Create Account
                       <ArrowRight className="h-5 w-5" />
@@ -385,9 +632,13 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                     <p className="text-sm text-gray-700">
                       Already have an account?{" "}
                       <button
-                        onClick={() => {
-                          const loginTab = document.querySelector('[value="login"]');
-                          if (loginTab) loginTab.click();
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const loginElement = document.querySelector('[value="login"]') as HTMLElement;
+                          if (loginElement) {
+                            loginElement.click();
+                          }
                         }}
                         className="text-orange-600 hover:text-orange-700 font-semibold transition-colors"
                       >
