@@ -102,7 +102,11 @@ const services = [
   },
 ];
 
+import { useState } from "react";
+
 const ServicesPage = () => {
+  const [selectedService, setSelectedService] = useState(null);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
@@ -116,7 +120,7 @@ const ServicesPage = () => {
               Everything you need for unforgettable adventures
             </h1>
             <p className="text-lg text-muted-foreground">
-              From permits and planning to on-ground safety and support—we handle the details so you can focus on the journey.
+              From permits and planning to on-ground safety and support we handle the details so you can focus on the journey.
             </p>
           </div>
         </section>
@@ -147,12 +151,58 @@ const ServicesPage = () => {
                         </li>
                       ))}
                     </ul>
+
+                    <div className="mt-4">
+                      <button
+                        onClick={() => setSelectedService(s)}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-white text-sm hover:bg-primary/90"
+                      >
+                        Preview
+                      </button>
+                    </div>
                   </CardContent>
                 </Card>
               );
             })}
           </div>
         </section>
+
+        {selectedService && (
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 relative">
+              <button
+                onClick={() => setSelectedService(null)}
+                className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-2xl"
+              >
+                ✕
+              </button>
+
+              <div className="mb-4">
+                <h2 className="text-2xl font-semibold mb-2">{selectedService.title}</h2>
+                <p className="text-sm text-muted-foreground mb-4">{selectedService.description}</p>
+
+                <ul className="space-y-2 text-sm">
+                  {selectedService.points.map((p) => (
+                    <li key={p} className="flex items-start gap-2">
+                      <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary"></span>
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-6">
+                <button
+                  onClick={() => setSelectedService(null)}
+                  className="w-full bg-primary text-white py-2 rounded-lg"
+                >
+                  Close Preview
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </main>
       <Footer />
     </div>
