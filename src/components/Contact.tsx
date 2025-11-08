@@ -1,12 +1,36 @@
-import { Mail as MailIcon, Phone as PhoneIcon } from "lucide-react";
+import { Mail as MailIcon, Phone as PhoneIcon, Search, ChevronDown } from "lucide-react";
 import WhatsAppIcon from "./icons/WhatsAppIcon";
 import { Card, CardContent } from "./ui/card";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
+import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { FormEvent, useState } from "react";
+
+const COUNTRIES = [
+  { code: "IN", name: "India", dial: "+91" },
+  { code: "US", name: "United States", dial: "+1" },
+  { code: "GB", name: "United Kingdom", dial: "+44" },
+  { code: "CA", name: "Canada", dial: "+1" },
+  { code: "AU", name: "Australia", dial: "+61" },
+  { code: "DE", name: "Germany", dial: "+49" },
+  { code: "FR", name: "France", dial: "+33" },
+  { code: "IT", name: "Italy", dial: "+39" },
+  { code: "ES", name: "Spain", dial: "+34" },
+  { code: "JP", name: "Japan", dial: "+81" },
+  { code: "CN", name: "China", dial: "+86" },
+  { code: "SG", name: "Singapore", dial: "+65" },
+  { code: "MY", name: "Malaysia", dial: "+60" },
+  { code: "TH", name: "Thailand", dial: "+66" },
+  { code: "PH", name: "Philippines", dial: "+63" },
+  { code: "ID", name: "Indonesia", dial: "+62" },
+  { code: "BD", name: "Bangladesh", dial: "+880" },
+  { code: "PK", name: "Pakistan", dial: "+92" },
+  { code: "SL", name: "Sri Lanka", dial: "+94" },
+  { code: "NP", name: "Nepal", dial: "+977" },
+];
 
 const Contact = () => {
   const { toast } = useToast();
