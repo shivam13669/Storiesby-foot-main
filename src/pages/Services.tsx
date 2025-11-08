@@ -113,7 +113,8 @@ const ServicesPage = () => {
   const [selectedService, setSelectedService] = useState(null);
 
   return (
-    <div className="min-h-screen relative overflow-hidden py-16 px-6 bg-gradient-to-br from-sky-50 via-white to-emerald-50">
+    <>
+      <div className="min-h-screen relative overflow-hidden py-16 px-6 bg-gradient-to-br from-sky-50 via-white to-emerald-50">
       <Navigation />
 
       <div className="absolute -top-24 -left-24 w-72 h-72 md:w-96 md:h-96 bg-gradient-to-br from-sky-200 to-teal-300 rounded-full opacity-30 filter blur-3xl transform rotate-45 -z-10 pointer-events-none"></div>
@@ -191,8 +192,10 @@ const ServicesPage = () => {
         )}
       </main>
 
-      <Footer />
     </div>
+
+    <Footer />
+  </>
   );
 };
 
