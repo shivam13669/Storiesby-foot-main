@@ -1,4 +1,3 @@
-import { Mail, Phone } from "lucide-react";
 import { Mail as MailIcon, Phone as PhoneIcon } from "lucide-react";
 import WhatsAppIcon from "./icons/WhatsAppIcon";
 import { Card, CardContent } from "./ui/card";
