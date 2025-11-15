@@ -330,11 +330,11 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                   {/* Terms Text */}
                   <p className="text-xs text-gray-500 text-center mt-4">
                     By continuing, you agree to StoriesByFoot's{" "}
-                    <a href="#" className="text-orange-600 hover:underline">
+                    <a href="/terms-and-condition" className="text-orange-600 hover:underline">
                       Terms & Conditions
                     </a>
                     {" "}and{" "}
-                    <a href="#" className="text-orange-600 hover:underline">
+                    <a href="/privacy-policy" className="text-orange-600 hover:underline">
                       Privacy Policy
                     </a>
                   </p>
@@ -577,11 +577,11 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                       />
                       <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
                         I agree to the{" "}
-                        <a href="#" className="text-orange-600 hover:text-orange-700 font-semibold">
+                        <a href="/terms-and-condition" className="text-orange-600 hover:text-orange-700 font-semibold">
                           Terms & Conditions
                         </a>
                         {" "}and{" "}
-                        <a href="#" className="text-orange-600 hover:text-orange-700 font-semibold">
+                        <a href="/privacy-policy" className="text-orange-600 hover:text-orange-700 font-semibold">
                           Privacy Policy
                         </a>
                       </span>
@@ -669,11 +669,11 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                   {/* Terms Text */}
                   <p className="text-xs text-gray-500 text-center mt-4">
                     By continuing, you agree to StoriesByFoot's{" "}
-                    <a href="#" className="text-orange-600 hover:underline">
+                    <a href="/terms-and-condition" className="text-orange-600 hover:underline">
                       Terms & Conditions
                     </a>
                     {" "}and{" "}
-                    <a href="#" className="text-orange-600 hover:underline">
+                    <a href="/privacy-policy" className="text-orange-600 hover:underline">
                       Privacy Policy
                     </a>
                   </p>
