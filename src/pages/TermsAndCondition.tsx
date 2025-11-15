@@ -37,20 +37,11 @@ export default function TermsAndConditionPage() {
 
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">2. Eligibility</h2>
-              <div className="space-y-3 text-slate-700">
-                <div>
-                  <h3 className="font-semibold mb-1">2.1</h3>
-                  <p className="leading-relaxed">You must be at least 18 years old to access or use our Services. If you are under 18 years of age, you may only use our Services with the consent and supervision of a parent or legal guardian who accepts these Terms on your behalf.</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">2.2</h3>
-                  <p className="leading-relaxed">By using this Website, you represent that you have the legal capacity to enter into binding agreements.</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">2.3</h3>
-                  <p className="leading-relaxed">If you are accessing this Website on behalf of another person or organization, you confirm that you have full authority to do so.</p>
-                </div>
-              </div>
+              <ul className="space-y-2 text-slate-700 leading-relaxed list-disc list-inside">
+                <li>You must be at least 18 years old to access or use our Services. If you are under 18 years of age, you may only use our Services with the consent and supervision of a parent or legal guardian who accepts these Terms on your behalf.</li>
+                <li>By using this Website, you represent that you have the legal capacity to enter into binding agreements.</li>
+                <li>If you are accessing this Website on behalf of another person or organization, you confirm that you have full authority to do so.</li>
+              </ul>
             </section>
 
             <section className="space-y-4">
