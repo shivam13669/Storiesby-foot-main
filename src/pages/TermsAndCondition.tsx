@@ -206,24 +206,20 @@ export default function TermsAndConditionPage() {
               <h2 className="text-2xl font-semibold text-slate-800">10. Limitation of Liability</h2>
               <div className="space-y-3 text-slate-700">
                 <div>
-                  <h3 className="font-semibold mb-1">10.1</h3>
+                  <h3 className="font-semibold mb-1">10.1. Accuracy of Information</h3>
                   <p className="leading-relaxed">StoriesByFoot strives to provide accurate information but does not guarantee the completeness, accuracy, or reliability of all content.</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-1">10.2</h3>
-                  <p className="leading-relaxed mb-2">We are not liable for:</p>
-                  <ul className="space-y-1 list-disc list-inside ml-4">
+                  <h3 className="font-semibold mb-2">10.2. We are not liable for:</h3>
+                  <ul className="space-y-1 list-disc list-inside ml-4 text-slate-700">
                     <li>Delays, cancellations, or losses arising from third-party services;</li>
                     <li>Force majeure events (e.g., natural disasters, government restrictions, strikes, pandemics);</li>
-                    <li>Any direct, indirect, or consequential losses including data loss, emotional distress, or financial damages.</li>
+                    <li>Any direct, indirect, or consequential losses including data loss, emotional distress, or financial damages;</li>
+                    <li>In no case shall our total liability exceed the total amount paid by you for the booking in question.</li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-1">10.3</h3>
-                  <p className="leading-relaxed">In no case shall our total liability exceed the total amount paid by you for the booking in question.</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">10.4. Health, Safety, and Medical Conditions</h3>
+                  <h3 className="font-semibold mb-1">10.3. Health, Safety, and Medical Conditions</h3>
                   <p className="leading-relaxed mb-2">Travel and adventure activities involve inherent risks, including but not limited to illness, injury, accidents, or other health-related issues.</p>
                   <p className="leading-relaxed mb-2">By participating in any travel experience or using the services listed on StoriesByFoot, you acknowledge and accept these risks.</p>
                   <p className="leading-relaxed mb-2">StoriesByFoot is not responsible for any injury, illness, loss of property, or anything that may occur during travel, tours, or activities arranged through third-party providers.</p>
