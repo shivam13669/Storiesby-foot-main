@@ -26,7 +26,7 @@ export default function CookiePolicyPage() {
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">1. Purpose of This Policy</h2>
               <p className="text-slate-700 leading-relaxed mb-2">
                 The purpose of this Cookie Policy is to inform you about:
@@ -42,7 +42,7 @@ export default function CookiePolicyPage() {
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">2. What Are Cookies</h2>
               <p className="text-slate-700 leading-relaxed mb-2">
                 Cookies are small text files placed on your device when you visit a website. They are widely used to ensure websites function efficiently, remember user preferences, and provide analytics for improvement.
@@ -52,7 +52,7 @@ export default function CookiePolicyPage() {
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">3. Types of Cookies We Use</h2>
               <p className="text-slate-700 leading-relaxed mb-3">
                 StoriesByFoot uses the following categories of cookies on its Website:
@@ -84,7 +84,7 @@ export default function CookiePolicyPage() {
               </div>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">4. How We Use Cookie Data</h2>
               <p className="text-slate-700 leading-relaxed mb-2">
                 We use cookies to:
@@ -101,7 +101,7 @@ export default function CookiePolicyPage() {
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">5. Managing and Disabling Cookies</h2>
               <p className="text-slate-700 leading-relaxed mb-2">
                 Most web browsers allow you to control cookies through their settings. You can:
@@ -119,7 +119,7 @@ export default function CookiePolicyPage() {
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">6. Third-Party Tools and Services</h2>
               <p className="text-slate-700 leading-relaxed mb-2">
                 StoriesByFoot may use trusted third-party tools, such as:
@@ -133,7 +133,7 @@ export default function CookiePolicyPage() {
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">7. Data Protection and Privacy</h2>
               <p className="text-slate-700 leading-relaxed mb-2">
                 All data collected through cookies is handled in accordance with our Privacy Policy.
@@ -146,7 +146,7 @@ export default function CookiePolicyPage() {
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">8. Updates to This Policy</h2>
               <p className="text-slate-700 leading-relaxed mb-2">
                 We may revise or update this Cookie Policy from time to time to reflect changes in technology, legal requirements, or business operations.
@@ -159,7 +159,7 @@ export default function CookiePolicyPage() {
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4 pt-8 border-t border-slate-200">
               <h2 className="text-2xl font-semibold text-slate-800">9. Contact Information</h2>
               <p className="text-slate-700 leading-relaxed mb-3">
                 For any queries, complaints, or support, please contact us:

@@ -26,7 +26,7 @@ export default function PrivacyPolicyPage() {
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">1. Information We Collect</h2>
               <p className="text-slate-700 leading-relaxed">
                 We collect personal and non-personal information from you in several ways, including:
@@ -67,7 +67,7 @@ export default function PrivacyPolicyPage() {
               </div>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">2. Use of Collected Information</h2>
               <p className="text-slate-700 leading-relaxed mb-2">
                 We use your information for legitimate business purposes, including:
@@ -85,7 +85,7 @@ export default function PrivacyPolicyPage() {
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">3. Cookies and Tracking Technologies</h2>
               <p className="text-slate-700 leading-relaxed mb-2">
                 Our Website uses cookies and similar tracking tools to:
@@ -100,7 +100,7 @@ export default function PrivacyPolicyPage() {
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">4. Sharing and Disclosure of Information</h2>
               <p className="text-slate-700 leading-relaxed">
                 We may share your information in the following situations:
@@ -135,7 +135,7 @@ export default function PrivacyPolicyPage() {
               </div>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">5. Data Storage and Security</h2>
               <p className="text-slate-700 leading-relaxed mb-2">
                 We employ reasonable administrative, technical, and physical safeguards to protect your information from unauthorized access, loss, misuse, or alteration. Sensitive information (like payment details) is processed through secure, PCI-DSS compliant payment gateways.
@@ -145,7 +145,7 @@ export default function PrivacyPolicyPage() {
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">6. Your Rights and Choices</h2>
               <p className="text-slate-700 leading-relaxed mb-2">
                 Depending on your jurisdiction, you may have the right to:
@@ -160,7 +160,7 @@ export default function PrivacyPolicyPage() {
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">7. Data Retention</h2>
               <p className="text-slate-700 leading-relaxed mb-2">
                 We retain your information only for as long as necessary to:
@@ -175,14 +175,14 @@ export default function PrivacyPolicyPage() {
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">8. Third-Party Links</h2>
               <p className="text-slate-700 leading-relaxed">
                 Our Website may contain links to external websites (e.g., hotel partners, tourism boards). StoriesByFoot is not responsible for the privacy practices or content of such third-party sites. We encourage you to review their policies before interacting or sharing information.
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">9. Children's Privacy</h2>
               <p className="text-slate-700 leading-relaxed mb-2">
                 Our Services are primarily intended for individuals who are 18 years of age or older. If you are under 18 years of age, you may use our Services only under the supervision and consent of a parent or legal guardian.
@@ -192,21 +192,21 @@ export default function PrivacyPolicyPage() {
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">10. International Users</h2>
               <p className="text-slate-700 leading-relaxed">
                 If you are accessing our Website from outside India, please note that your information may be transferred to and processed in India, where data protection laws may differ from your jurisdiction. By using our Website, you consent to such transfers.
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4">
               <h2 className="text-2xl font-semibold text-slate-800">11. Changes to this Privacy Policy</h2>
               <p className="text-slate-700 leading-relaxed">
                 StoriesByFoot reserves the right to modify or update this Privacy Policy at any time. All changes will be posted on this page with an updated "Last Updated" date. Your continued use of the Website after changes signifies acceptance of the revised Policy.
               </p>
             </section>
 
-            <section className="space-y-4 pt-6 border-t border-slate-200">
+            <section className="space-y-4 pt-8 border-t border-slate-200">
               <h2 className="text-2xl font-semibold text-slate-800">12. Contact Information</h2>
               <div className="text-slate-700 leading-relaxed space-y-2">
                 <p>📧 Email: <a href="mailto:contact@storiesbyfoot.com" className="text-blue-600 hover:text-blue-800 hover:underline transition-colors">contact@storiesbyfoot.com</a>, <a href="mailto:storiesbyfoot@gmail.com" className="text-blue-600 hover:text-blue-800 hover:underline transition-colors">storiesbyfoot@gmail.com</a></p>
