@@ -91,7 +91,7 @@ export default function TermsAndConditionPage() {
                 <div className="mt-4">
                   <h3 className="font-semibold mb-2">4.2. Cancellations by the Traveler</h3>
                   <ul className="space-y-2 list-disc list-outside pl-6">
-                    <li>Cancellations must be made in writing by emailing storiesbyfoot@gmail.com with your booking details.</li>
+                    <li>Cancellations must be made in writing by emailing <a href="mailto:storiesbyfoot@gmail.com" className="text-blue-600 hover:text-blue-800 hover:underline transition-colors">storiesbyfoot@gmail.com</a> with your booking details.</li>
                     <li>Cancellations are subject to the specific policy of the Vendor (hotel, tour operator, etc.) handling your booking.</li>
                     <li>Some bookings—such as last-minute deals, seasonal offers, or non-refundable packages—may not be eligible for cancellation or refund.</li>
                     <li>Refunds, if applicable, will exclude service or convenience fees charged.</li>
