@@ -12,7 +12,7 @@ export default function TermsAndConditionPage() {
               Terms and Conditions
             </h1>
             <p className="text-slate-600 text-lg">
-              Last Updated: November, 2025
+              Last Updated: <strong>November, 2025</strong>
             </p>
           </header>
 
