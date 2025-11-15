@@ -92,9 +92,9 @@ const DestinationDetailPage = () => {
             />
           </div>
 
-          <div className="container mx-auto px-4 -mt-32 relative z-10">
+          <div className="container mx-auto px-4 -mt-48 relative z-10">
             <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:gap-12">
-              <div>
+              <div className="lg:mt-[1.125rem]">
                 <Button asChild variant="outline" size="sm" className="mb-6">
                   <Link to="/destinations" className="inline-flex items-center gap-2">
                     <ArrowLeft className="h-4 w-4" />
@@ -128,7 +128,7 @@ const DestinationDetailPage = () => {
                 </div>
               </div>
 
-              <aside className="lg:sticky lg:top-24">
+              <aside className="lg:sticky lg:top-24 lg:-mt-20">
                 <div className="rounded-2xl bg-white p-8 shadow-xl">
                   <p className="text-sm font-semibold text-muted-foreground">Starting from</p>
                   <div className="mt-2 flex items-baseline gap-3">
