@@ -33,8 +33,6 @@ const COUNTRIES = [
   { code: "TH", name: "Thailand", dial: "+66" },
   { code: "PH", name: "Philippines", dial: "+63" },
   { code: "ID", name: "Indonesia", dial: "+62" },
-  { code: "BD", name: "Bangladesh", dial: "+880" },
-  { code: "PK", name: "Pakistan", dial: "+92" },
   { code: "SL", name: "Sri Lanka", dial: "+94" },
   { code: "NP", name: "Nepal", dial: "+977" },
 ];
