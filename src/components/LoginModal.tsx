@@ -359,7 +359,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                       <label className="block text-sm font-semibold text-gray-900">
                         Full Name
                       </label>
-                      <div className="relative group">
+                      <div className="relative group" onMouseDown={() => setIsPasswordFieldFocused(false)}>
                         <User className="absolute left-3.5 top-3.5 h-5 w-5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
                         <Input
                           type="text"
@@ -377,7 +377,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                       <label className="block text-sm font-semibold text-gray-900">
                         Email Address
                       </label>
-                      <div className="relative group">
+                      <div className="relative group" onMouseDown={() => setIsPasswordFieldFocused(false)}>
                         <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
                         <Input
                           type="email"
@@ -395,7 +395,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                       <label className="block text-sm font-semibold text-gray-900">
                         Mobile Number
                       </label>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2" onMouseDown={() => setIsPasswordFieldFocused(false)}>
                         {/* Country Code Selector */}
                         <Popover open={openCountryPopover} onOpenChange={setOpenCountryPopover}>
                           <PopoverTrigger asChild>
@@ -521,7 +521,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                       <label className="block text-sm font-semibold text-gray-900">
                         Confirm Password
                       </label>
-                      <div className="relative group">
+                      <div className="relative group" onMouseDown={() => setIsPasswordFieldFocused(false)}>
                         <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
                         <Input
                           type={showConfirmPassword ? "text" : "password"}
@@ -556,7 +556,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                     </div>
 
                     {/* Terms Checkbox */}
-                    <label className="flex items-start gap-2 cursor-pointer group mt-3">
+                    <label className="flex items-start gap-2 cursor-pointer group mt-3" onMouseDown={() => setIsPasswordFieldFocused(false)}>
                       <input
                         type="checkbox"
                         checked={agreeTerms}
@@ -566,11 +566,11 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                       />
                       <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
                         I agree to the{" "}
-                        <a href="/terms-and-condition" className="text-orange-600 hover:text-orange-700 font-semibold">
+                        <a href="/terms-and-condition" className="text-orange-600 hover:text-orange-700 font-semibold" onMouseDown={() => setIsPasswordFieldFocused(false)}>
                           Terms & Conditions
                         </a>
                         {" "}and{" "}
-                        <a href="/privacy-policy" className="text-orange-600 hover:text-orange-700 font-semibold">
+                        <a href="/privacy-policy" className="text-orange-600 hover:text-orange-700 font-semibold" onMouseDown={() => setIsPasswordFieldFocused(false)}>
                           Privacy Policy
                         </a>
                       </span>
@@ -598,7 +598,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
                   {/* Google Sign Up */}
                   <div className="grid grid-cols-1 gap-3">
-                    <button className="border-2 border-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-lg hover:border-orange-200 hover:bg-orange-50/30 transition-all duration-200 flex items-center justify-center gap-2 group">
+                    <button onMouseDown={() => setIsPasswordFieldFocused(false)} className="border-2 border-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-lg hover:border-orange-200 hover:bg-orange-50/30 transition-all duration-200 flex items-center justify-center gap-2 group">
                       <svg className="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
                         <path
                           fill="#4285F4"
@@ -631,6 +631,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                           e.preventDefault();
                           setActiveTab('login');
                         }}
+                        onMouseDown={() => setIsPasswordFieldFocused(false)}
                         className="text-orange-600 hover:text-orange-700 font-semibold transition-colors"
                       >
                         Login here
