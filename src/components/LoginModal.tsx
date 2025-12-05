@@ -67,6 +67,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [isPasswordFieldFocused, setIsPasswordFieldFocused] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
 
   const filteredCountries = COUNTRIES.filter(country =>
     country.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
