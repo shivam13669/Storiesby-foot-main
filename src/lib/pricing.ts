@@ -1,15 +1,15 @@
 /**
- * Region-based pricing configuration
- * Each region has its own base currency and base price
- * This is NOT derived from exchange rates, but manually defined per region
+ * Region configuration
+ * All prices are in INR (base currency)
+ * Non-Indian users see prices with 20% markup applied
  */
 
 export type RegionPricing = {
   /** ISO 3166-1 alpha-2 country code */
   countryCode: string;
-  /** ISO 4217 currency code */
+  /** ISO 4217 currency code (recommended for the region) */
   baseCurrency: string;
-  /** Base price for the product/service in the region's currency */
+  /** Base price for the product/service in INR */
   basePrice: number;
   /** Locale code for number/currency formatting */
   locale: string;
