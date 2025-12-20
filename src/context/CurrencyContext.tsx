@@ -257,8 +257,10 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const value: CurrencyContextValue = {
     currency,
     setCurrency,
-    region,
+    region: detectedRegion,
     regionPricing,
+    detectedRegion,
+    isIndianUser,
     convertPrice,
     formatPrice,
     rates,
