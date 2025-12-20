@@ -21,6 +21,8 @@ type CurrencyContextValue = {
   setCurrency: (code: string) => void;
   region: string;
   regionPricing: RegionPricing;
+  detectedRegion: string;
+  isIndianUser: boolean;
   convertPrice: (basePrice: number, fromCurrency?: string) => number;
   formatPrice: (basePrice: number, opts?: { maximumFractionDigits?: number; fromCurrency?: string }) => string;
   rates: RatesMap;
@@ -164,29 +166,30 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     }
   });
 
-  const [region, setRegion] = useState<string>("");
+  const [detectedRegion, setDetectedRegion] = useState<string>("");
   const [isRegionLoaded, setIsRegionLoaded] = useState(false);
 
   // Detect region on mount
   useEffect(() => {
-    detectUserRegion().then((detectedRegion) => {
-      setRegion(detectedRegion);
+    detectUserRegion().then((detected) => {
+      setDetectedRegion(detected);
       setIsRegionLoaded(true);
 
       // Set default currency to region's base currency if not already set
       if (!currency) {
-        const regionPricing = getRegionPricing(detectedRegion);
+        const regionPricing = getRegionPricing(detected);
         setCurrencyState(regionPricing.baseCurrency);
       }
     });
   }, []);
 
-  const regionPricing = useMemo(() => getRegionPricing(region), [region]);
+  const isIndianUser = detectedRegion === "IN";
+  const regionPricing = useMemo(() => getRegionPricing(detectedRegion), [detectedRegion]);
 
-  // Use region's base currency for exchange rate fetching
+  // Always use INR as base currency for exchange rate fetching
   const { data, isLoading } = useQuery({
-    queryKey: ["fx-rates", regionPricing.baseCurrency],
-    queryFn: ({ signal }) => fetchExchangeRates(regionPricing.baseCurrency, signal),
+    queryKey: ["fx-rates", "INR"],
+    queryFn: ({ signal }) => fetchExchangeRates("INR", signal),
     staleTime: 1000 * 60 * 60, // 1 hour
     refetchInterval: 1000 * 60 * 5, // refresh every 5 minutes
     refetchOnWindowFocus: false,
@@ -194,7 +197,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   });
 
   const rates: RatesMap = useMemo(() => {
-    const map: RatesMap = { [regionPricing.baseCurrency]: 1 };
+    const map: RatesMap = { INR: 1 };
     if (data?.rates) {
       for (const [code, rate] of Object.entries(data.rates)) {
         if (typeof rate === "number" && rate > 0) {
@@ -207,10 +210,10 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
       .map(([code, rate]) => `${code}=${rate}`)
       .join(" ");
     console.log(
-      `[RATES MAP] Built from ${data?.apiSource || "unknown"} (base: ${regionPricing.baseCurrency}) | ${ratesLog}${Object.keys(map).length > 5 ? " ..." : ""}`
+      `[RATES MAP] Built from ${data?.apiSource || "unknown"} (base: INR) | ${ratesLog}${Object.keys(map).length > 5 ? " ..." : ""}`
     );
     return map;
-  }, [data, regionPricing.baseCurrency]);
+  }, [data]);
 
   const setCurrency = useCallback((code: string) => {
     const exists = CURRENCIES.some((c) => c.code === code);
@@ -226,18 +229,21 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     (basePrice: number, fromCurrency?: string) => {
       if (!Number.isFinite(basePrice)) return 0;
 
-      // Use specified currency or region's base currency
-      const sourceCurrency = fromCurrency || regionPricing.baseCurrency;
+      // Apply 20% markup for non-Indian users
+      const adjustedBasePrice = isIndianUser ? basePrice : basePrice * 1.2;
+
+      // Always use INR as the source currency
+      const sourceCurrency = fromCurrency || "INR";
       const sourceRate = rates[sourceCurrency] ?? 1;
       const targetRate = rates[currency] ?? 1;
 
-      const converted = (basePrice / sourceRate) * targetRate;
+      const converted = (adjustedBasePrice / sourceRate) * targetRate;
       console.log(
-        `[CONVERSION] ${basePrice} ${sourceCurrency} (rate: ${sourceRate}) → ${currency} (rate: ${targetRate}) = ${converted}`
+        `[CONVERSION] ${adjustedBasePrice} ${sourceCurrency} (rate: ${sourceRate}) → ${currency} (rate: ${targetRate}) = ${converted} [markup: ${isIndianUser ? "none" : "+20%"}]`
       );
       return converted;
     },
-    [currency, rates, regionPricing.baseCurrency]
+    [currency, rates, isIndianUser]
   );
 
   const formatPrice = useCallback(
@@ -251,8 +257,10 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const value: CurrencyContextValue = {
     currency,
     setCurrency,
-    region,
+    region: detectedRegion,
     regionPricing,
+    detectedRegion,
+    isIndianUser,
     convertPrice,
     formatPrice,
     rates,
