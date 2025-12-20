@@ -197,7 +197,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   });
 
   const rates: RatesMap = useMemo(() => {
-    const map: RatesMap = { [regionPricing.baseCurrency]: 1 };
+    const map: RatesMap = { INR: 1 };
     if (data?.rates) {
       for (const [code, rate] of Object.entries(data.rates)) {
         if (typeof rate === "number" && rate > 0) {
@@ -210,10 +210,10 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
       .map(([code, rate]) => `${code}=${rate}`)
       .join(" ");
     console.log(
-      `[RATES MAP] Built from ${data?.apiSource || "unknown"} (base: ${regionPricing.baseCurrency}) | ${ratesLog}${Object.keys(map).length > 5 ? " ..." : ""}`
+      `[RATES MAP] Built from ${data?.apiSource || "unknown"} (base: INR) | ${ratesLog}${Object.keys(map).length > 5 ? " ..." : ""}`
     );
     return map;
-  }, [data, regionPricing.baseCurrency]);
+  }, [data]);
 
   const setCurrency = useCallback((code: string) => {
     const exists = CURRENCIES.some((c) => c.code === code);
