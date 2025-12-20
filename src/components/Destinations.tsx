@@ -3,8 +3,7 @@ import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Calendar, MapPin, Star } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useCurrency } from "@/context/CurrencyContext";
-import { parseINRStringToNumber } from "@/lib/currency";
+import { useCurrency, parsePrice } from "@/context/CurrencyContext";
 
 const featuredDestinations = destinationCatalog.slice(0, 3);
 
