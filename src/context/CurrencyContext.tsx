@@ -229,18 +229,21 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     (basePrice: number, fromCurrency?: string) => {
       if (!Number.isFinite(basePrice)) return 0;
 
-      // Use specified currency or region's base currency
-      const sourceCurrency = fromCurrency || regionPricing.baseCurrency;
+      // Apply 20% markup for non-Indian users
+      const adjustedBasePrice = isIndianUser ? basePrice : basePrice * 1.2;
+
+      // Always use INR as the source currency
+      const sourceCurrency = fromCurrency || "INR";
       const sourceRate = rates[sourceCurrency] ?? 1;
       const targetRate = rates[currency] ?? 1;
 
-      const converted = (basePrice / sourceRate) * targetRate;
+      const converted = (adjustedBasePrice / sourceRate) * targetRate;
       console.log(
-        `[CONVERSION] ${basePrice} ${sourceCurrency} (rate: ${sourceRate}) → ${currency} (rate: ${targetRate}) = ${converted}`
+        `[CONVERSION] ${adjustedBasePrice} ${sourceCurrency} (rate: ${sourceRate}) → ${currency} (rate: ${targetRate}) = ${converted} [markup: ${isIndianUser ? "none" : "+20%"}]`
       );
       return converted;
     },
-    [currency, rates, regionPricing.baseCurrency]
+    [currency, rates, isIndianUser]
   );
 
   const formatPrice = useCallback(
