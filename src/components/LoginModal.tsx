@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Eye, EyeOff, Mail, Lock, ArrowRight, CheckCircle, User, Phone, Search, ChevronDown, X } from "lucide-react";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import {
@@ -11,6 +11,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -98,6 +100,8 @@ const validatePassword = (password: string) => {
 };
 
 export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
+  const { login, signup, sendOTP } = useAuth();
+  
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -120,6 +124,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [forgotPasswordEmailError, setForgotPasswordEmailError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
 
   const filteredCountries = COUNTRIES.filter(country =>
     country.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
@@ -131,16 +137,29 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const passwordsMatch = signupPassword && confirmPassword && signupPassword === confirmPassword;
   const isPasswordValid = passwordValidation.isValid && passwordsMatch;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateEmail(email)) {
       setEmailError("Please enter a valid email address (e.g., you@example.com)");
       return;
     }
-    console.log("Login:", { email, password });
+    
+    setIsLoading(true);
+    const { error } = await login(email, password);
+    setIsLoading(false);
+
+    if (error) {
+      setEmailError(error);
+      toast.error(error);
+    } else {
+      toast.success("Logged in successfully!");
+      setEmail("");
+      setPassword("");
+      onClose();
+    }
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateEmail(signupEmail)) {
       setSignupEmailError("Please enter a valid email address (e.g., you@example.com)");
@@ -148,33 +167,51 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     }
     if (!validateInternationalMobile(mobileNumber, selectedCountry.code)) {
       setMobileNumberError("Please enter a valid mobile number for the selected country");
-      alert("Please enter a valid mobile number for the selected country");
       return;
     }
     if (!isPasswordValid) {
-      alert("Password does not meet requirements");
+      toast.error("Password does not meet requirements");
       return;
     }
     if (!agreeTerms) {
-      alert("Please agree to terms and conditions");
+      toast.error("Please agree to terms and conditions");
       return;
     }
-    console.log("Signup:", {
-      fullName,
-      signupEmail,
-      mobileNumber,
-      country: selectedCountry,
-      signupPassword,
-    });
+
+    setIsLoading(true);
+    const { error } = await signup(signupEmail, signupPassword, fullName);
+    setIsLoading(false);
+
+    if (error) {
+      toast.error(error);
+    } else {
+      toast.success("Account created! Please log in.");
+      setSignupEmail("");
+      setSignupPassword("");
+      setConfirmPassword("");
+      setFullName("");
+      setMobileNumber("");
+      setActiveTab('login');
+    }
   };
 
-  const handleForgotPassword = (e: React.FormEvent) => {
+  const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateEmail(forgotPasswordEmail)) {
       setForgotPasswordEmailError("Please enter a valid email address (e.g., you@example.com)");
       return;
     }
-    console.log("Reset password for:", forgotPasswordEmail);
+
+    setIsLoading(true);
+    const { error } = await sendOTP(forgotPasswordEmail);
+    setIsLoading(false);
+
+    if (error) {
+      toast.error(error);
+    } else {
+      toast.success("OTP sent to your email!");
+      setOtpSent(true);
+    }
   };
 
   const handleCountrySelect = (country: typeof COUNTRIES[0]) => {
@@ -187,6 +224,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     setShowForgotPassword(false);
     setForgotPasswordEmail("");
     setForgotPasswordEmailError("");
+    setOtpSent(false);
   };
 
   return (
@@ -284,6 +322,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                               emailError ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20' : 'border-gray-200 focus:border-orange-500'
                             }`}
                             required
+                            disabled={isLoading}
                           />
                         </div>
                         {emailError && (
@@ -305,11 +344,13 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                             onChange={(e) => setPassword(e.target.value)}
                             className="w-full pl-11 pr-12 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 bg-gray-50/50 transition-all"
                             required
+                            disabled={isLoading}
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-600 transition-colors"
+                            className="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                            disabled={isLoading}
                           >
                             {showPassword ? (
                               <EyeOff className="h-5 w-5" />
@@ -325,7 +366,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                         <label className="flex items-center gap-2 cursor-pointer group">
                           <input
                             type="checkbox"
-                            className="w-4 h-4 rounded border-gray-300 accent-orange-500 cursor-pointer"
+                            className="w-4 h-4 rounded border-gray-300 accent-orange-500 cursor-pointer disabled:opacity-50"
+                            disabled={isLoading}
                           />
                           <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
                             Remember me
@@ -334,7 +376,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                         <button
                           type="button"
                           onClick={() => setShowForgotPassword(true)}
-                          className="text-sm text-orange-600 hover:text-orange-700 font-semibold transition-colors"
+                          className="text-sm text-orange-600 hover:text-orange-700 font-semibold transition-colors disabled:opacity-50"
+                          disabled={isLoading}
                         >
                           Forgot password?
                         </button>
@@ -343,10 +386,11 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                       {/* Login Button */}
                       <button
                         type="submit"
-                        className="w-full mt-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
+                        disabled={isLoading}
+                        className="w-full mt-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:from-gray-400 disabled:to-gray-400 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
                       >
-                        Login & Explore
-                        <ArrowRight className="h-5 w-5" />
+                        {isLoading ? "Logging in..." : "Login & Explore"}
+                        {!isLoading && <ArrowRight className="h-5 w-5" />}
                       </button>
                     </form>
 
@@ -361,7 +405,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
                     {/* Google Sign In */}
                     <div className="grid grid-cols-1 gap-3">
-                      <button className="border-2 border-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-lg hover:border-orange-200 hover:bg-orange-50/30 transition-all duration-200 flex items-center justify-center gap-2 group">
+                      <button disabled={isLoading} className="border-2 border-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-lg hover:border-orange-200 hover:bg-orange-50/30 transition-all duration-200 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed">
                         <svg className="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
                           <path
                             fill="#4285F4"
@@ -394,7 +438,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                             e.preventDefault();
                             setActiveTab('signup');
                           }}
-                          className="text-orange-600 hover:text-orange-700 font-semibold transition-colors"
+                          className="text-orange-600 hover:text-orange-700 font-semibold transition-colors disabled:opacity-50"
+                          disabled={isLoading}
                         >
                           Sign up free
                         </button>
@@ -457,8 +502,9 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                             placeholder="John Doe"
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
-                            className="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 bg-gray-50/50 transition-all"
+                            className="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 bg-gray-50/50 transition-all disabled:opacity-50"
                             required
+                            disabled={isLoading}
                           />
                         </div>
                       </div>
@@ -478,10 +524,11 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                               setSignupEmail(e.target.value);
                               setSignupEmailError("");
                             }}
-                            className={`w-full pl-11 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 bg-gray-50/50 transition-all ${
+                            className={`w-full pl-11 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 bg-gray-50/50 transition-all disabled:opacity-50 ${
                               signupEmailError ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20' : 'border-gray-200 focus:border-orange-500'
                             }`}
                             required
+                            disabled={isLoading}
                           />
                         </div>
                         {signupEmailError && (
@@ -505,7 +552,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                             <PopoverTrigger asChild>
                               <button
                                 type="button"
-                                className="px-3 py-2.5 border border-gray-200 rounded-lg bg-gray-50/50 hover:bg-gray-100 transition-all flex items-center gap-2 min-w-fit focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                                disabled={isLoading}
+                                className="px-3 py-2.5 border border-gray-200 rounded-lg bg-gray-50/50 hover:bg-gray-100 transition-all flex items-center gap-2 min-w-fit focus:outline-none focus:ring-2 focus:ring-orange-500/20 disabled:opacity-50"
                               >
                                 <span className="text-sm font-medium">{selectedCountry.dial}</span>
                                 <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -575,10 +623,11 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                                 setMobileNumber(truncated);
                                 setMobileNumberError("");
                               }}
-                              className={`w-full pl-11 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 bg-gray-50/50 transition-all ${
+                              className={`w-full pl-11 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 bg-gray-50/50 transition-all disabled:opacity-50 ${
                                 mobileNumberError ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20' : 'border-gray-200 focus:border-orange-500 focus:ring-orange-500/20'
                               }`}
                               required
+                              disabled={isLoading}
                             />
                           </div>
                         </div>
@@ -601,13 +650,15 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                             onChange={(e) => setSignupPassword(e.target.value)}
                             onFocus={() => setIsPasswordFieldFocused(true)}
                             onBlur={() => setIsPasswordFieldFocused(false)}
-                            className="w-full pl-11 pr-12 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 bg-gray-50/50 transition-all"
+                            className="w-full pl-11 pr-12 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 bg-gray-50/50 transition-all disabled:opacity-50"
                             required
+                            disabled={isLoading}
                           />
                           <button
                             type="button"
                             onClick={() => setShowSignupPassword(!showSignupPassword)}
-                            className="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-600 transition-colors"
+                            className="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                            disabled={isLoading}
                           >
                             {showSignupPassword ? (
                               <EyeOff className="h-5 w-5" />
@@ -669,15 +720,17 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                             placeholder="••••••••"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className={`w-full pl-11 pr-12 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 bg-gray-50/50 transition-all ${
+                            className={`w-full pl-11 pr-12 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 bg-gray-50/50 transition-all disabled:opacity-50 ${
                               confirmPassword && !passwordsMatch ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-orange-500'
                             }`}
                             required
+                            disabled={isLoading}
                           />
                           <button
                             type="button"
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-600 transition-colors"
+                            className="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                            disabled={isLoading}
                           >
                             {showConfirmPassword ? (
                               <EyeOff className="h-5 w-5" />
@@ -702,8 +755,9 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                           type="checkbox"
                           checked={agreeTerms}
                           onChange={(e) => setAgreeTerms(e.target.checked)}
-                          className="w-4 h-4 rounded border-gray-300 accent-orange-500 cursor-pointer mt-0.5"
+                          className="w-4 h-4 rounded border-gray-300 accent-orange-500 cursor-pointer mt-0.5 disabled:opacity-50"
                           required
+                          disabled={isLoading}
                         />
                         <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
                           I agree to the{" "}
@@ -720,11 +774,11 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                       {/* Sign Up Button */}
                       <button
                         type="submit"
-                        disabled={!isPasswordValid || !fullName || !signupEmail || !validateEmail(signupEmail) || !mobileNumber || !validateInternationalMobile(mobileNumber, selectedCountry.code) || !agreeTerms}
+                        disabled={!isPasswordValid || !fullName || !signupEmail || !validateEmail(signupEmail) || !mobileNumber || !validateInternationalMobile(mobileNumber, selectedCountry.code) || !agreeTerms || isLoading}
                         className="w-full mt-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
                       >
-                        Create Account
-                        <ArrowRight className="h-5 w-5" />
+                        {isLoading ? "Creating Account..." : "Create Account"}
+                        {!isLoading && <ArrowRight className="h-5 w-5" />}
                       </button>
                     </form>
 
@@ -739,7 +793,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
                     {/* Google Sign Up */}
                     <div className="grid grid-cols-1 gap-3">
-                      <button onMouseDown={() => setIsPasswordFieldFocused(false)} className="border-2 border-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-lg hover:border-orange-200 hover:bg-orange-50/30 transition-all duration-200 flex items-center justify-center gap-2 group">
+                      <button type="button" disabled={isLoading} onMouseDown={() => setIsPasswordFieldFocused(false)} className="border-2 border-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-lg hover:border-orange-200 hover:bg-orange-50/30 transition-all duration-200 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed">
                         <svg className="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
                           <path
                             fill="#4285F4"
@@ -773,7 +827,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                             setActiveTab('login');
                           }}
                           onMouseDown={() => setIsPasswordFieldFocused(false)}
-                          className="text-orange-600 hover:text-orange-700 font-semibold transition-colors"
+                          className="text-orange-600 hover:text-orange-700 font-semibold transition-colors disabled:opacity-50"
+                          disabled={isLoading}
                         >
                           Login here
                         </button>
@@ -819,52 +874,65 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                     Forgotten Your Password?
                   </h2>
                   <p className="text-sm text-gray-600">
-                    Don't worry, we'll send you a message to help you reset your password.
+                    Don't worry, we'll send you an OTP to reset your password.
                   </p>
                 </div>
 
-                <form onSubmit={handleForgotPassword} className="space-y-4">
-                  {/* Email Field */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-900">
-                      Email Address
-                    </label>
-                    <div className="relative group">
-                      <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
-                      <Input
-                        type="text"
-                        placeholder="you@example.com"
-                        value={forgotPasswordEmail}
-                        onChange={(e) => {
-                          setForgotPasswordEmail(e.target.value);
-                          setForgotPasswordEmailError("");
-                        }}
-                        className={`w-full pl-11 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 bg-gray-50/50 transition-all ${
-                          forgotPasswordEmailError ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20' : 'border-gray-200 focus:border-orange-500'
-                        }`}
-                        required
-                      />
+                {!otpSent ? (
+                  <form onSubmit={handleForgotPassword} className="space-y-4">
+                    {/* Email Field */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-900">
+                        Email Address
+                      </label>
+                      <div className="relative group">
+                        <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                        <Input
+                          type="text"
+                          placeholder="you@example.com"
+                          value={forgotPasswordEmail}
+                          onChange={(e) => {
+                            setForgotPasswordEmail(e.target.value);
+                            setForgotPasswordEmailError("");
+                          }}
+                          className={`w-full pl-11 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 bg-gray-50/50 transition-all disabled:opacity-50 ${
+                            forgotPasswordEmailError ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20' : 'border-gray-200 focus:border-orange-500'
+                          }`}
+                          required
+                          disabled={isLoading}
+                        />
+                      </div>
+                      {forgotPasswordEmailError && (
+                        <p className="text-xs text-red-500 font-medium">{forgotPasswordEmailError}</p>
+                      )}
                     </div>
-                    {forgotPasswordEmailError && (
-                      <p className="text-xs text-red-500 font-medium">{forgotPasswordEmailError}</p>
-                    )}
-                  </div>
 
-                  {/* Continue Button */}
-                  <button
-                    type="submit"
-                    className="w-full mt-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
-                  >
-                    Continue
-                  </button>
-                </form>
+                    {/* Continue Button */}
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full mt-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:from-gray-400 disabled:to-gray-400 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
+                    >
+                      {isLoading ? "Sending OTP..." : "Send OTP"}
+                    </button>
+                  </form>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-800">
+                        ✓ OTP sent to {forgotPasswordEmail}. Check your email for the code.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Return to Login */}
                 <div className="text-center pt-2">
                   <button
                     type="button"
                     onClick={returnToLogin}
-                    className="text-sm text-orange-600 hover:text-orange-700 font-semibold transition-colors"
+                    className="text-sm text-orange-600 hover:text-orange-700 font-semibold transition-colors disabled:opacity-50"
+                    disabled={isLoading}
                   >
                     Return to Log in
                   </button>
