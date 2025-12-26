@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Quote, ChevronLeft, ChevronRight } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { supabase, Testimonial } from "@/lib/supabase";
+import { toast as sonnerToast } from "sonner";
 
 const getInitials = (fullName: string) => {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -204,14 +208,45 @@ const journeyOptions = [
 ];
 
 const TestimonialsPage = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
   const [rating, setRating] = useState(5);
   const [loading, setLoading] = useState(false);
+  const [databaseTestimonials, setDatabaseTestimonials] = useState<Testimonial[]>([]);
+  const [dbLoading, setDbLoading] = useState(true);
 
   const PAGE_SIZE = 6;
   const [page, setPage] = useState(0);
-  const totalPages = Math.ceil(testimonials.length / PAGE_SIZE);
-  const currentItems = testimonials.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+
+  // Combine database testimonials with fallback testimonials
+  const allTestimonials = databaseTestimonials.length > 0 ? databaseTestimonials : testimonials;
+  const totalPages = Math.ceil(allTestimonials.length / PAGE_SIZE);
+  const currentItems = allTestimonials.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+
+  // Fetch published testimonials from database
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        setDbLoading(true);
+        const { data, error } = await supabase
+          .from('testimonials')
+          .select('*')
+          .eq('isPublished', true)
+          .order('createdAt', { ascending: false });
+
+        if (error) throw error;
+        setDatabaseTestimonials((data as Testimonial[]) || []);
+      } catch (error) {
+        console.error('Error fetching testimonials:', error);
+        // Fall back to static testimonials
+      } finally {
+        setDbLoading(false);
+      }
+    };
+
+    fetchTestimonials();
+  }, []);
 
   useEffect(() => {
     if (page > totalPages - 1) {
@@ -219,23 +254,29 @@ const TestimonialsPage = () => {
     }
   }, [totalPages, page]);
 
+  const handleSubmitClick = () => {
+    if (!isAuthenticated) {
+      sonnerToast.error('Please log in to share your testimonial');
+      return;
+    }
+
+    if (!user?.canWriteTestimonial) {
+      sonnerToast.error('Your account is not enabled to write testimonials yet. Please contact admin.');
+      return;
+    }
+
+    navigate('/user-dashboard?tab=submit');
+  };
+
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const form = event.currentTarget;
-    const data = new FormData(form);
-    const fullName = String(data.get("name") || "").trim();
 
-    setLoading(true);
+    if (!isAuthenticated) {
+      sonnerToast.error('Please log in to share your testimonial');
+      return;
+    }
 
-    setTimeout(() => {
-      setLoading(false);
-      toast({
-        title: "Story received",
-        description: `${fullName ? fullName + ", " : ""}thank you for trusting us with your journey.`,
-      });
-      form.reset();
-      setRating(5);
-    }, 700);
+    handleSubmitClick();
   };
 
   return (
@@ -344,39 +385,47 @@ const TestimonialsPage = () => {
             </div>
           </div>
 
-          <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {currentItems.map((story) => (
-              <Card
-                key={story.name}
-                className="group h-full border border-border/60 bg-card/90 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/60"
-              >
-                <CardHeader className="flex flex-col gap-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar>
-                      <AvatarFallback>{getInitials(story.name)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-semibold leading-tight">{story.name}</p>
-                      <p className="text-xs text-muted-foreground">{story.role}</p>
-                      <p className="mt-0.5 text-xs text-primary/80">{story.location}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-primary/90">
-                    <Quote className="h-4 w-4" />
-                    <span>{story.trip}</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm leading-relaxed text-muted-foreground">{story.quote}</p>
-                  <div className="flex items-center justify-between text-xs font-medium">
-                    <span className="text-2xl text-yellow-400">{"★".repeat(story.rating)}{"☆".repeat(5 - story.rating)}</span>
-                    <span className="rounded-full bg-primary/10 px-3 py-1 text-primary/80">
-                      {story.highlight}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="mt-10">
+            {dbLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {currentItems.map((story) => (
+                  <Card
+                    key={'id' in story ? story.id : story.name}
+                    className="group h-full border border-border/60 bg-card/90 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/60"
+                  >
+                    <CardHeader className="flex flex-col gap-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarFallback>{getInitials(story.name)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-semibold leading-tight">{story.name}</p>
+                          <p className="text-xs text-muted-foreground">{story.role}</p>
+                          <p className="mt-0.5 text-xs text-primary/80">{story.location}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-primary/90">
+                        <Quote className="h-4 w-4" />
+                        <span>{story.trip}</span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-sm leading-relaxed text-muted-foreground">{story.quote}</p>
+                      <div className="flex items-center justify-between text-xs font-medium">
+                        <span className="text-2xl text-yellow-400">{"★".repeat(story.rating)}{"☆".repeat(5 - story.rating)}</span>
+                        <span className="rounded-full bg-primary/10 px-3 py-1 text-primary/80">
+                          {story.highlight}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -413,69 +462,39 @@ const TestimonialsPage = () => {
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <form className="space-y-5" onSubmit={onSubmit}>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Full name</Label>
-                        <Input id="name" name="name" placeholder="Your name" required />
+                  <div className="space-y-5">
+                    {isAuthenticated && user?.canWriteTestimonial ? (
+                      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="text-sm text-green-800">
+                          ✓ You're enabled to write testimonials! Go to your dashboard to share.
+                        </p>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" name="email" type="email" placeholder="you@example.com" required />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="journey">Adventure taken</Label>
-                      <Input
-                        list="journey-options"
-                        id="journey"
-                        name="journey"
-                        placeholder="Select or type the itinerary"
-                        required
-                      />
-                      <datalist id="journey-options">
-                        {journeyOptions.map((journey) => (
-                          <option key={journey} value={journey} />
-                        ))}
-                      </datalist>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="moments">Favourite moments</Label>
-                      <Textarea
-                        id="moments"
-                        name="moments"
-                        placeholder="Share how the trip made you feel, any standout crew members, and highlights."
-                        className="min-h-32"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-3">
-                      <Label className="block">Rating</Label>
-                      <div className="flex items-center gap-1 cursor-pointer">
-                        {[1, 2, 3, 4, 5].map((value) => (
-                          <span
-                            key={value}
-                            className="text-3xl text-yellow-400 cursor-pointer transition-transform hover:scale-110"
-                            onClick={() => setRating(value)}
-                            role="button"
-                            tabIndex={0}
-                            aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                setRating(value);
-                              }
-                            }}
-                          >
-                            {value <= rating ? "★" : "☆"}
-                          </span>
-                        ))}
-                      </div>
-                      <input type="hidden" name="rating" value={rating} />
-                    </div>
-                    <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? "Sharing…" : "Submit testimonial"}
+                    ) : null}
+
+                    <Button
+                      onClick={handleSubmitClick}
+                      className="w-full"
+                      size="lg"
+                    >
+                      {isAuthenticated
+                        ? user?.canWriteTestimonial
+                          ? "Share Your Story"
+                          : "Waiting for Admin Approval"
+                        : "Login to Share Your Story"}
                     </Button>
-                  </form>
+
+                    {!isAuthenticated && (
+                      <p className="text-sm text-muted-foreground text-center">
+                        Please log in using the button in the top navigation to share your testimonial.
+                      </p>
+                    )}
+
+                    {isAuthenticated && !user?.canWriteTestimonial && (
+                      <p className="text-sm text-orange-600 text-center">
+                        Your account is pending admin approval to write testimonials. Please check back soon!
+                      </p>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </div>
