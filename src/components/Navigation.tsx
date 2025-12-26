@@ -1,10 +1,18 @@
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard, User as UserIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { CurrencyPicker } from "./CurrencyPicker";
 import { LoginModal } from "./LoginModal";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useAuth } from "@/context/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navItems = [
   { name: "Home", to: "/", type: "route" as const },
@@ -19,6 +27,7 @@ const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { currency, setCurrency } = useCurrency();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-lg border-b border-white/10 text-white shadow-lg">
@@ -55,15 +64,56 @@ const Navigation = () => {
             })}
           </div>
 
-          {/* Currency + Login */}
+          {/* Currency + Login/User Menu */}
           <div className="hidden md:flex items-center gap-3">
             <CurrencyPicker value={currency} onChange={setCurrency} />
-            <button
-              onClick={() => setIsLoginModalOpen(true)}
-              className="text-white/90 hover:text-white font-medium transition-colors"
-            >
-              Login
-            </button>
+            {isAuthenticated && user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-sm font-bold">
+                      {user.fullName.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-white/90 text-sm font-medium max-w-[100px] truncate">
+                      {user.fullName}
+                    </span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem disabled className="text-xs text-muted-foreground cursor-default">
+                    {user.email}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {isAdmin ? (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin-dashboard" className="flex items-center gap-2 cursor-pointer">
+                        <LayoutDashboard className="w-4 h-4" />
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem asChild>
+                      <Link to="/user-dashboard" className="flex items-center gap-2 cursor-pointer">
+                        <UserIcon className="w-4 h-4" />
+                        My Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => logout()} className="flex items-center gap-2 text-red-600 cursor-pointer">
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <button
+                onClick={() => setIsLoginModalOpen(true)}
+                className="text-white/90 hover:text-white font-medium transition-colors"
+              >
+                Login
+              </button>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -110,17 +160,40 @@ const Navigation = () => {
                   </a>
                 );
               })}
-              <div className="px-3 py-2 flex items-center gap-2">
-                <CurrencyPicker value={currency} onChange={setCurrency} className="flex-1" />
-                <button
-                  onClick={() => {
-                    setIsLoginModalOpen(true);
-                    setIsOpen(false);
-                  }}
-                  className="flex-none px-4 py-2 rounded-md bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors"
-                >
-                  Login
-                </button>
+              <div className="px-3 py-2 border-t border-white/10 mt-2 pt-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <CurrencyPicker value={currency} onChange={setCurrency} className="flex-1" />
+                </div>
+                {isAuthenticated && user ? (
+                  <>
+                    <Link
+                      to={isAdmin ? "/admin-dashboard" : "/user-dashboard"}
+                      onClick={() => setIsOpen(false)}
+                      className="block px-3 py-2 rounded-md bg-orange-500/20 text-orange-300 text-sm font-medium hover:bg-orange-500/30 transition-colors"
+                    >
+                      {isAdmin ? "Admin Dashboard" : "My Dashboard"}
+                    </Link>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsOpen(false);
+                      }}
+                      className="w-full px-3 py-2 rounded-md bg-red-500/20 text-red-300 text-sm font-medium hover:bg-red-500/30 transition-colors text-left"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setIsLoginModalOpen(true);
+                      setIsOpen(false);
+                    }}
+                    className="w-full px-4 py-2 rounded-md bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors"
+                  >
+                    Login
+                  </button>
+                )}
               </div>
             </div>
           </div>
